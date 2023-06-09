@@ -1,10 +1,11 @@
 package com.domanski.githubtask.uttils;
 
+import com.domanski.githubtask.exception.GithubServerException;
 import com.domanski.githubtask.model.Branch;
 import com.domanski.githubtask.model.dto.BranchResponse;
 import lombok.AllArgsConstructor;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
+import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.Arrays;
@@ -19,10 +20,15 @@ public class GitBranchDownloader implements GitBranchDownloadable {
 
     @Override
     public List<BranchResponse> downloadAllBranchesFromBranchesUrl(String branchesUrl) {
-        ResponseEntity<Branch[]> branches = restTemplate.getForEntity(branchesUrl, Branch[].class);
-        return Arrays.stream(Objects.requireNonNull(branches.getBody()))
-                .map(GitBranchDownloader::createBranchResponse)
-                .toList();
+        try {
+            Branch[] branches = restTemplate.getForEntity(branchesUrl, Branch[].class).getBody();
+            return Arrays.stream(Objects.requireNonNull(branches))
+                    .map(GitBranchDownloader::createBranchResponse)
+                    .toList();
+        } catch (HttpServerErrorException e) {
+            throw new GithubServerException("Problem with external service, please try letter");
+        }
+
     }
 
     private static BranchResponse createBranchResponse(Branch branch) {

@@ -1,10 +1,12 @@
 package com.domanski.githubtask.config;
 
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.web.client.RestTemplate;
 
-@org.springframework.context.annotation.Configuration
-public class Configuration {
+@Configuration
+public class RestTemplateConfiguration {
+
     @Bean
     public RestTemplate restTemplate() {
         return new RestTemplate();
