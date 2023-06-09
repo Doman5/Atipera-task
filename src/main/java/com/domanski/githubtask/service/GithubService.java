@@ -20,30 +20,30 @@ public class GithubService {
     public List<UserRepoResponse> getUserRepositoriesWithBranches(String username) {
         List<GitRepo> userRepos = gitRepoDownloader.downloadGitRepos(username);
         return userRepos.stream()
-                .filter(repo -> !repo.isFork())
+                .filter(repo -> !repo.fork())
                 .map(GithubService::deleteRedundantBranchUrlEnding)
                 .map(this::downloadAllRepoBranchesAndCreateUserRepoResponse
                 ).toList();
     }
 
     private UserRepoResponse downloadAllRepoBranchesAndCreateUserRepoResponse(GitRepo repo) {
-        List<BranchResponse> branches = gitBranchDownloader.downloadAllBranchesFromBranchesUrl(repo.getBranchesUrl());
+        List<BranchResponse> branches = gitBranchDownloader.downloadAllBranchesFromBranchesUrl(repo.branchesUrl());
         return createUserRepoResponse(repo, branches);
     }
 
     private static GitRepo deleteRedundantBranchUrlEnding(GitRepo repo) {
         return GitRepo.builder()
-                .name(repo.getName())
-                .owner(repo.getOwner())
-                .fork(repo.isFork())
-                .branchesUrl(repo.getBranchesUrl().substring(0, repo.getBranchesUrl().length() - 9))
+                .name(repo.name())
+                .owner(repo.owner())
+                .fork(repo.fork())
+                .branchesUrl(repo.branchesUrl().replace("{/branch}", ""))
                 .build();
     }
 
     private static UserRepoResponse createUserRepoResponse(GitRepo repo, List<BranchResponse> branches) {
         return UserRepoResponse.builder()
-                .repoName(repo.getName())
-                .ownerLogin(repo.getOwner().login())
+                .repoName(repo.name())
+                .ownerLogin(repo.owner().login())
                 .branches(branches)
                 .build();
     }
